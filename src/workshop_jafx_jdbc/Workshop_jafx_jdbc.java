@@ -18,7 +18,8 @@ import javafx.stage.Stage;
  * @author MASTER
  */
 public class Workshop_jafx_jdbc extends Application {
-    
+    private static Scene scene;
+   
     @Override
     public void start(Stage stage) throws Exception {
         try{
@@ -26,7 +27,7 @@ public class Workshop_jafx_jdbc extends Application {
         
         root.setFitToHeight(true);
         root.setFitToWidth(true);
-        Scene scene = new Scene(root);
+        scene = new Scene(root);
         
         stage.setScene(scene);
         stage.setTitle("Sample JavaFx Application");
@@ -36,10 +37,9 @@ public class Workshop_jafx_jdbc extends Application {
             e.printStackTrace();
         }
     }
-
-    /**
-     * @param args the command line arguments
-     */
+    public static Scene getScene(){
+        return scene;
+    }
     public static void main(String[] args) {
         launch(args);
     }
