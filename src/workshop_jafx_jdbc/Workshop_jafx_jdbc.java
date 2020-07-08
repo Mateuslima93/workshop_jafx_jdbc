@@ -25,8 +25,10 @@ public class Workshop_jafx_jdbc extends Application {
         try{
         ScrollPane root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         
+        //Ajustar Vbox ao ScrollPane
         root.setFitToHeight(true);
         root.setFitToWidth(true);
+        
         scene = new Scene(root);
         
         stage.setScene(scene);

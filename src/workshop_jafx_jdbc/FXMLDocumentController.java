@@ -51,6 +51,7 @@ public class FXMLDocumentController implements Initializable {
         // TODO
     }    
     private synchronized void loadView(String absoluteName){
+        //Abrir nova aba
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
             VBox newVBox = loader.load();
