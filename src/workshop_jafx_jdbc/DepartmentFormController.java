@@ -8,7 +8,9 @@ package workshop_jafx_jdbc;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import workshop.db.DbException;
 import workshop.entites.Department;
+import workshop.exceptions.ValidationException;
 import workshop.listeners.DataChangeListener;
 import workshop.services.DepartmentService;
 import workshop.util.Alerts;
@@ -62,6 +65,9 @@ public class DepartmentFormController implements Initializable {
             notifyDataChangeListeners();
             Utils.currentStage(event).close();
         }
+        catch(ValidationException e){
+            setErrorMessage(e.getErrors());
+        }
         catch(DbException e){
             Alerts.showAlert("Error saving object", null, e.getMessage(), Alert.AlertType.ERROR);
         }
@@ -99,13 +105,29 @@ public class DepartmentFormController implements Initializable {
 
     private Department getFormData() {
         Department obj = new Department();
-        obj.setId(Utils.tryParseInt(txtId.getText()));
-        obj.setName(txtName.getText());
+       
+        ValidationException exception = new ValidationException("Validation Error");
         
+        obj.setId(Utils.tryParseInt(txtId.getText()));
+        if (txtName.getText()==null || txtName.getText().trim().equals("")) {
+            exception.addErrors("name", "Field can't be empty");
+        }
+        obj.setName(txtName.getText());
+        if (exception.getErrors().size()> 0) {
+            throw exception;
+        }
         return obj;
     }
 
     private void notifyDataChangeListeners() {
         dataChangeListeners.forEach((listener) -> {listener.onDataChanged();});
+    }
+    
+    private void setErrorMessage (Map<String,String> errors){
+       Set<String> fields = errors.keySet();
+        if (fields.contains("name")) {
+            labelErrorName.setText(errors.get("name"));
+        }
+    
     }
 }
