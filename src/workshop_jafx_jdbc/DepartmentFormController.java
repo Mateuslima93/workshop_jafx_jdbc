@@ -6,6 +6,8 @@
 package workshop_jafx_jdbc;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import workshop.db.DbException;
 import workshop.entites.Department;
+import workshop.listeners.DataChangeListener;
 import workshop.services.DepartmentService;
 import workshop.util.Alerts;
 import workshop.util.Constraints;
@@ -28,6 +31,7 @@ import workshop.util.Utils;
 public class DepartmentFormController implements Initializable {
     private Department entity;
     private DepartmentService service;
+    private List <DataChangeListener> dataChangeListeners = new ArrayList <>();
     
     @FXML
     private TextField txtId;
@@ -55,6 +59,7 @@ public class DepartmentFormController implements Initializable {
         try{
             entity = getFormData();
             service.saveOrUpdate(entity);
+            notifyDataChangeListeners();
             Utils.currentStage(event).close();
         }
         catch(DbException e){
@@ -70,6 +75,9 @@ public class DepartmentFormController implements Initializable {
     }
     public void setDepartmentService(DepartmentService service){
         this.service = service;
+    }
+    public void subscribeDataChangeListeners(DataChangeListener listener){
+        dataChangeListeners.add(listener);
     }
     
     @Override
@@ -95,5 +103,9 @@ public class DepartmentFormController implements Initializable {
         obj.setName(txtName.getText());
         
         return obj;
+    }
+
+    private void notifyDataChangeListeners() {
+        dataChangeListeners.forEach((listener) -> {listener.onDataChanged();});
     }
 }
