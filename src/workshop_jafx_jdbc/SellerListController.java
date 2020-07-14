@@ -18,6 +18,7 @@ import javafx.stage.Stage;
 import workshop.entites.Department;
 import workshop.entites.Seller;
 import workshop.services.SellerService;
+import workshop.util.Utils;
 
 public class SellerListController implements Initializable {
     private SellerService service;
@@ -33,8 +34,6 @@ public class SellerListController implements Initializable {
     private TableColumn<Seller, Date> tableColumnBirthDate;
     @FXML
     private TableColumn<Seller, Double> tableColumnBaseSalary;
-    @FXML
-    private TableColumn<Seller, Department> tableColumnDepartment;
     @FXML
     private Button btNew;
     
@@ -54,12 +53,13 @@ public class SellerListController implements Initializable {
         initializeNodes();
     }
     private void initializeNodes(){
-        tableColumnId.setCellValueFactory(new PropertyValueFactory("Id"));
-        tableColumnName.setCellValueFactory(new PropertyValueFactory("Name"));
-        tableColumnEmail.setCellValueFactory(new PropertyValueFactory("Email"));
-        tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory("BirthDate"));
-        tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory("BaseSalary"));
-        tableColumnDepartment.setCellValueFactory(new PropertyValueFactory("Department"));
+        tableColumnId.setCellValueFactory(new PropertyValueFactory("id"));
+        tableColumnName.setCellValueFactory(new PropertyValueFactory("name"));
+        tableColumnEmail.setCellValueFactory(new PropertyValueFactory("email"));
+        tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory("birthDate"));
+        Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+        tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory("baseSalary"));
+        Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
         
         Stage stage = (Stage) Workshop_jafx_jdbc.getScene().getWindow();
         tableViewSeller.prefHeightProperty().bind(stage.heightProperty());
