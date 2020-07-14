@@ -21,6 +21,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import workshop.services.DepartmentService;
+import workshop.services.SellerService;
 import workshop.util.Alerts;
 
 /**
@@ -37,7 +38,9 @@ public class FXMLDocumentController implements Initializable {
     
     @FXML 
     public void onMenuItemSellerAction(){
-        System.out.println("onMenuItemSellerAction");
+        loadView("SellerList.fxml", (SellerListController controller) ->{
+            controller.setSellerService(new SellerService());
+            controller.updateTableView();});
     }
     @FXML
     public void onMenuItemDepartmentAction(){
