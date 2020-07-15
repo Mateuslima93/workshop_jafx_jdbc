@@ -43,7 +43,7 @@ public class SellerDaoJdbc implements SellerDao {
                     + "VALUES "
                     + "(?, ?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS);
-            st.setString(1, obj.getEmail());
+            st.setString(1, obj.getName());
             st.setString(2, obj.getEmail());
             st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
             st.setDouble(4, obj.getBaseSalary());
@@ -78,7 +78,7 @@ public class SellerDaoJdbc implements SellerDao {
             st = conn.prepareStatement(
                     "UPDATE seller "
                     + "SET Name = ?, Email = ?, BirthDate = ?, "
-                    + "BaseSalay = ?, DepartmentId = ? "
+                    + "BaseSalary = ?, DepartmentId = ? "
                     + "WHERE Id = ?");
             st.setString(1, obj.getName());
             st.setString(2, obj.getEmail());

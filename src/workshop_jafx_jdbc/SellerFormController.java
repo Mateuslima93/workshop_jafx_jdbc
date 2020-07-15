@@ -2,9 +2,11 @@
 package workshop_jafx_jdbc;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -88,10 +90,11 @@ private ObservableList<Department> obsList;
     }
     private void initializeNodes(){
         Constraints.setTextFieldInteger(txtId);
-        Constraints.setTextFieldMaxLength(txtName, 70);
-        Constraints.setTextFieldMaxLength(txtEmail, 60);
+        Constraints.setTextFieldMaxLength(txtName, 50);
         Constraints.setTextFieldDouble(txtBaseSalary);
+        Constraints.setTextFieldMaxLength(txtEmail, 60);
         Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
+        initializeComboBox();
     }
     public void updateFormData(){
         if (entity == null) {
@@ -104,7 +107,13 @@ private ObservableList<Department> obsList;
             dpBirthDate.setValue(entity.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
         Locale.setDefault(Locale.US);
-        txtBaseSalary.setText(String.format("%.2f",entity.getBaseSalary()));
+        txtBaseSalary.setText(String.valueOf(entity.getBaseSalary()));
+        if (entity.getDepartment()== null) {
+            comboBoxDepartment.getSelectionModel().selectFirst();
+        }
+        else{
+            comboBoxDepartment.setValue(entity.getDepartment());
+        }
         
                 
     }
@@ -117,11 +126,43 @@ private ObservableList<Department> obsList;
         comboBoxDepartment.setItems(obsList);
     }
     public Seller getFormData(){
-        Seller obj = new Seller;
-        
+        Seller obj = new Seller();
+
         ValidationException exception = new ValidationException("Validation Error");
         
         obj.setId(Utils.tryParseInt(txtId.getText()));
+        
+        if (txtName.getText()==null || txtName.getText().trim().equals("")) {
+            exception.addErrors("name", "Field can't be empty");
+        }
+        obj.setName(txtName.getText());
+        
+        if (txtEmail.getText()==null || txtEmail.getText().trim().equals("")) {
+            exception.addErrors("email", "Field can't be empty");
+        }
+        obj.setEmail(txtEmail.getText());
+        
+        if(dpBirthDate.getValue()== null){
+            exception.addErrors("birthDate", "Field can't be empty");
+        }
+        else{
+            Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+            obj.setBirthDate(Date.from(instant));
+        }
+        
+        if (txtBaseSalary.getText()==null || txtBaseSalary.getText().trim().equals("")) {
+            exception.addErrors("baseSalary", "Field can't be empty");
+        }
+        
+        obj.setBaseSalary(Utils.tryParseDouble(txtBaseSalary.getText()));
+        
+        obj.setDepartment(comboBoxDepartment.getValue());
+        
+        if (exception.getErrors().size()> 0) {
+            throw exception;
+        }
+        
+        return obj;
         
     } 
     @FXML
@@ -147,15 +188,20 @@ private ObservableList<Department> obsList;
     }
     @FXML
     public void onBtCancelAction(ActionEvent event){
-        Utils.currentStage(event);
+        Utils.currentStage(event).close();
     }
     
         private void setErrorMessage (Map<String,String> errors){
        Set<String> fields = errors.keySet();
-        if (fields.contains("name")) {
-            labelErrorName.setText(errors.get("name"));
-        }
-    
+       
+        labelErrorName.setText(fields.contains("name") ? errors.get("name"): "");
+        
+        labelErrorEmail.setText(fields.contains("email") ? errors.get("email"): "");
+
+        labelErrorBirthDate.setText(fields.contains("birthDate")? errors.get("birthDate"): "");
+
+        labelErrorBaseSalary.setText(fields.contains("baseSalary") ? errors.get("baseSalary"): "");
+         
     }
     
     public void initializeComboBox(){
@@ -163,9 +209,12 @@ private ObservableList<Department> obsList;
             @Override
             protected void updateItem(Department item, boolean empty){
                 super.updateItem(item,empty);
+                //Operador ternário
                 setText(empty ? "" : item.getName());
         }
     };
+        comboBoxDepartment.setCellFactory(factory);
+        comboBoxDepartment.setButtonCell(factory.call(null));
     }
     
 }

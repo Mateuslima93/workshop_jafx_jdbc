@@ -35,6 +35,13 @@ public class Utils {
             return null;
         }
     }
+    public static Double tryParseDouble(String str){
+        try{
+            return Double.parseDouble(str);
+        }catch(NumberFormatException e){
+            return null;
+        }
+    }
     public static <T> void formatTableColumnDate(TableColumn<T, Date> tableColumn, String format){
         tableColumn.setCellFactory(column -> {
             TableCell<T, Date> cell = new TableCell<T, Date>(){
@@ -74,13 +81,15 @@ public class Utils {
     }
     public static void formatDatePicker(DatePicker datePicker, String format){
         datePicker.setConverter(new StringConverter<LocalDate>(){
+            
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(format);
+            
             {
                 datePicker.setPromptText(format.toLowerCase());
             }
             @Override
             public String toString(LocalDate date) {
-                if (date == null) {
+                if (date != null) {
                     return dateFormatter.format(date);
                 }
                 else{

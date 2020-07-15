@@ -144,7 +144,7 @@ public class SellerListController implements Initializable,DataChangeListener {
     }
 
     private void initRemoveButtons() {
-         tableColumnRemove.setCellValueFactory((param) -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnRemove.setCellValueFactory((param) -> new ReadOnlyObjectWrapper<>(param.getValue()));
         tableColumnRemove.setCellFactory((param) -> new TableCell<Seller,Seller>(){
             private final Button button = new Button("remove");
             @Override

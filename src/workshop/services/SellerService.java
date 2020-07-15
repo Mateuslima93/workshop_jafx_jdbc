@@ -7,7 +7,7 @@ import workshop.dao.SellerDao;
 import workshop.entites.Seller;
 
 public class SellerService {
-    private final SellerDao dao = DaoFactory.createSelletDao();
+    private final SellerDao dao = DaoFactory.createSellerDao();
     
     public List<Seller> findAll(){
         return dao.findAll();
