@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,19 +17,23 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import workshop.db.DbException;
 import workshop.entites.Department;
 import workshop.entites.Seller;
+import workshop.listeners.DataChangeListener;
 import workshop.services.SellerService;
 import workshop.util.Alerts;
 import workshop.util.Utils;
 
-public class SellerListController implements Initializable {
+public class SellerListController implements Initializable,DataChangeListener {
     private SellerService service;
     @FXML
     private TableView<Seller> tableViewSeller;
@@ -42,13 +48,19 @@ public class SellerListController implements Initializable {
     @FXML
     private TableColumn<Seller, Double> tableColumnBaseSalary;
     @FXML
+    private TableColumn<Seller, Seller> tableColumnEdit;
+    @FXML
+    private TableColumn<Seller, Seller> tableColumnRemove;
+    @FXML
     private Button btNew;
     
     private ObservableList<Seller> obsList;
     
     @FXML
     public void onBtNewAction(ActionEvent event){
-        
+        Stage parentStage = Utils.currentStage(event);
+        Seller obj = new Seller();
+        createDialogForm(obj,"SellerForm.fxml",parentStage);
     }
     
     public void setSellerService(SellerService service){
@@ -79,6 +91,8 @@ public class SellerListController implements Initializable {
         List<Seller> list = service.findAll();
         obsList = FXCollections.observableArrayList(list);
         tableViewSeller.setItems(obsList);
+        initEditButtons();
+        initRemoveButtons();
     }
     public void createDialogForm(Seller obj, String absoluteName, Stage parentStage){
         try{
@@ -88,6 +102,8 @@ public class SellerListController implements Initializable {
             SellerFormController controller = loader.getController();
             controller.setSeller(obj);
             controller.setSellerService(new SellerService());
+            controller.subscribeDataChangeListeners(this);
+            controller.updateFormData();
             
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Enter Seller Data");
@@ -99,6 +115,64 @@ public class SellerListController implements Initializable {
         }
         catch(IOException e){
             Alerts.showAlert("IO Exception", "Error Loading View", e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    @Override
+    public void onDataChanged() {
+        updateTableView();
+    }
+
+    private void initEditButtons() {
+        tableColumnEdit.setCellValueFactory((param)-> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnEdit.setCellFactory((param) -> new TableCell<Seller,Seller>(){
+            private final Button button = new Button("edit");
+            @Override
+            protected void updateItem(Seller obj, boolean empty){
+                super.updateItem(obj,empty);
+                
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+                setGraphic(button);
+                button.setOnAction(event -> createDialogForm(obj, "SellerForm.fxml", Utils.currentStage(event)));
+                }
+        });
+    }
+
+    private void initRemoveButtons() {
+         tableColumnRemove.setCellValueFactory((param) -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        tableColumnRemove.setCellFactory((param) -> new TableCell<Seller,Seller>(){
+            private final Button button = new Button("remove");
+            @Override
+            protected void updateItem(Seller obj, boolean empty){
+                super.updateItem(obj, empty);
+                
+                if (obj == null) {
+                    setGraphic(null);
+                    return;
+                }
+                setGraphic(button);
+                button.setOnAction(event -> removeEntity(obj));
+            }
+            
+        });
+    }
+     private void removeEntity(Seller obj){
+        Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure delete?");
+        
+        if(result.get() == ButtonType.OK){
+            if (service == null) {
+                throw new IllegalStateException("Service was null");
+            }
+            try{
+                service.removeSeller(obj);
+                updateTableView();
+            }
+            catch(DbException e){
+                Alerts.showAlert("Error removing object", null, e.getMessage(), Alert.AlertType.ERROR);
+            }
         }
     }
     

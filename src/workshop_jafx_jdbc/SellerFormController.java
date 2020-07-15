@@ -4,26 +4,35 @@ package workshop_jafx_jdbc;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import workshop.db.DbException;
 import workshop.entites.Department;
 import workshop.entites.Seller;
 import workshop.exceptions.ValidationException;
+import workshop.listeners.DataChangeListener;
 import workshop.services.SellerService;
+import workshop.util.Alerts;
 import workshop.util.Constraints;
 import workshop.util.Utils;
 
 public class SellerFormController implements Initializable {
 private Seller entity;
 private SellerService service;
+private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 
 @FXML
 private TextField txtId;
@@ -56,6 +65,12 @@ private Button btCancel;
     public void setSellerService(SellerService service){
         this.service = service;
     }
+    public void subscribeDataChangeListeners(DataChangeListener listener){
+        dataChangeListeners.add(listener);
+    }
+    private void notifyDataChangeListeners(){
+        dataChangeListeners.forEach((listener) -> {listener.onDataChanged();});
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -87,6 +102,7 @@ private Button btCancel;
         Seller obj = new Seller;
         
         ValidationException exception = new ValidationException("Validation Error");
+        
         obj.setId(Utils.tryParseInt(txtId.getText()));
         
     } 
@@ -99,18 +115,29 @@ private Button btCancel;
             throw new IllegalStateException("Service was null");
         }
         try{
-            
+          entity = getFormData();
+          service.saveOrUpdate(entity);
+          notifyDataChangeListeners();
+          Utils.currentStage(event).close();
         }
-        catch(){
-            
+        catch(ValidationException e){
+            setErrorMessage(e.getErrors());
         }
-        catch(){
-            
+        catch(DbException e){
+            Alerts.showAlert("Error saving objects", null, e.getMessage(), Alert.AlertType.ERROR);
         }
     }
     @FXML
     public void onBtCancelAction(ActionEvent event){
         Utils.currentStage(event);
+    }
+    
+        private void setErrorMessage (Map<String,String> errors){
+       Set<String> fields = errors.keySet();
+        if (fields.contains("name")) {
+            labelErrorName.setText(errors.get("name"));
+        }
+    
     }
     
 }
