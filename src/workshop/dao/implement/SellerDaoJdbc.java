@@ -29,7 +29,7 @@ public class SellerDaoJdbc implements SellerDao {
     }
     private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException{
         Seller obj = new Seller (rs.getInt("Id"),rs.getString("Name"),rs.getString("Email"),
-                rs.getDate("BirthDate"), rs.getDouble("BaseSalary"),dep);
+                new java.util.Date(rs.getTimestamp("BirthDate").getTime()), rs.getDouble("BaseSalary"),dep);
         return obj;
     }
     

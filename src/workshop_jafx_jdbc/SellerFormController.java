@@ -2,12 +2,17 @@
 package workshop_jafx_jdbc;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import workshop.entites.Department;
 import workshop.entites.Seller;
@@ -27,11 +32,19 @@ private TextField txtName;
 @FXML
 private TextField txtEmail;
 @FXML
-private TextField txtBirthDate;
+private DatePicker dpBirthDate;
 @FXML
 private TextField txtBaseSalary;
 @FXML
 private ComboBox<Department> comboBoxDepartment;
+@FXML
+private Label labelErrorName;
+@FXML
+private Label labelErrorEmail;
+@FXML
+private Label labelErrorBirthDate;
+@FXML
+private Label labelErrorBaseSalary;
 @FXML
 private Button btSave;
 @FXML
@@ -50,9 +63,10 @@ private Button btCancel;
     }
     private void initializeNodes(){
         Constraints.setTextFieldInteger(txtId);
-        Constraints.setTextFieldMaxLength(txtName, 30);
-        Constraints.setTextFieldMaxLength(txtEmail, 50);
+        Constraints.setTextFieldMaxLength(txtName, 70);
+        Constraints.setTextFieldMaxLength(txtEmail, 60);
         Constraints.setTextFieldDouble(txtBaseSalary);
+        Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
     }
     public void updateFormData(){
         if (entity == null) {
@@ -61,8 +75,11 @@ private Button btCancel;
         txtId.setText(String.valueOf(entity.getId()));
         txtName.setText(entity.getName());
         txtEmail.setText(entity.getEmail());
-        txtBirthDate.setText(entity.getBirthDate());
-        txtBaseSalary.setText(String.valueOf(entity.getBaseSalary()));
+        if (entity.getBirthDate() != null) {
+            dpBirthDate.setValue(entity.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        }
+        Locale.setDefault(Locale.US);
+        txtBaseSalary.setText(String.format("%.2f",entity.getBaseSalary()));
         
                 
     }
