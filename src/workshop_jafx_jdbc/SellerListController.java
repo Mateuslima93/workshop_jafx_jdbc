@@ -29,6 +29,7 @@ import workshop.db.DbException;
 import workshop.entites.Department;
 import workshop.entites.Seller;
 import workshop.listeners.DataChangeListener;
+import workshop.services.DepartmentService;
 import workshop.services.SellerService;
 import workshop.util.Alerts;
 import workshop.util.Utils;
@@ -101,7 +102,8 @@ public class SellerListController implements Initializable,DataChangeListener {
             
             SellerFormController controller = loader.getController();
             controller.setSeller(obj);
-            controller.setSellerService(new SellerService());
+            controller.setServices(new SellerService(), new DepartmentService());
+            controller.loadAssociateObjects();
             controller.subscribeDataChangeListeners(this);
             controller.updateFormData();
             
